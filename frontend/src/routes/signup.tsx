@@ -42,7 +42,8 @@ function Signup() {
       }
 
       localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       
       // Redirection vers la page d'accueil (connexion réussie)
       navigate({ to: "/" });

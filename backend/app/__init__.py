@@ -9,11 +9,7 @@ def create_app(config_class=Config):
     # Initialize Flask extensions
     db.init_app(app)
     migrate.init_app(app, db)
-<<<<<<< HEAD
     cors.init_app(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
-=======
-    cors.init_app(app)
->>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
 
     # Register a simple health check route
     @app.route('/api/health')
@@ -35,10 +31,6 @@ def create_app(config_class=Config):
 
     # Register auth_routes blueprint
     from .routes.auth_routes import auth_bp
-<<<<<<< HEAD
     app.register_blueprint(auth_bp, url_prefix='/api')
-=======
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
->>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
 
     return app

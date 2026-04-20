@@ -12,11 +12,7 @@ def build_video_response(row):
         "title": row["title"],
         "description": row["description"],
         "thumbnail_url": row["thumbnail_url"],
-<<<<<<< HEAD
         "video_url": row["video_object_name"] if row["video_object_name"].startswith(("http://", "https://")) else f"{current_app.config['MINIO_BASE_URL']}/{row['video_object_name']}",
-=======
-        "video_url": f"{current_app.config['MINIO_BASE_URL']}/{row['video_object_name']}",
->>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
         "duration": row["duration"],
         "category": row["category"]
     }

@@ -1,11 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-<<<<<<< HEAD
 load_dotenv(override=True)
-=======
-load_dotenv()
->>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
@@ -13,10 +9,7 @@ class Config:
 
     DB_HOST = os.getenv("DB_HOST", "localhost")
     DB_PORT = os.getenv("DB_PORT", "5432")
-<<<<<<< HEAD
     print(f"DEBUG: Config Loaded -> {DB_HOST}:{DB_PORT}")
-=======
->>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
     DB_NAME = os.getenv("DB_NAME", "streaming_db")
     DB_USER = os.getenv("DB_USER", "postgres")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "")
