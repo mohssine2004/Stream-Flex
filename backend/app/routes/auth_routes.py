@@ -8,7 +8,11 @@ auth_bp = Blueprint("auth", __name__)
 
 
 def validate_register_payload(data):
+<<<<<<< HEAD
     required_fields = ["name", "email", "password"]
+=======
+    required_fields = ["username", "email", "password"]
+>>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
 
     if not data:
         return "Request body is missing"
@@ -17,8 +21,13 @@ def validate_register_payload(data):
         if field not in data:
             return f"Missing field: {field}"
 
+<<<<<<< HEAD
     if not str(data["name"]).strip():
         return "name cannot be empty"
+=======
+    if not str(data["username"]).strip():
+        return "username cannot be empty"
+>>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
 
     if not str(data["email"]).strip():
         return "email cannot be empty"
@@ -45,7 +54,11 @@ def validate_login_payload(data):
     return None
 
 
+<<<<<<< HEAD
 @auth_bp.route("/signup", methods=["POST"])
+=======
+@auth_bp.route("/register", methods=["POST"])
+>>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
 def register():
     conn = None
     cursor = None
@@ -62,7 +75,11 @@ def register():
 
         cursor.execute(
             "SELECT id FROM users WHERE email = %s OR username = %s",
+<<<<<<< HEAD
             (data["email"], data["name"])
+=======
+            (data["email"], data["username"])
+>>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
         )
         existing_user = cursor.fetchone()
 
@@ -76,7 +93,11 @@ def register():
             VALUES (%s, %s, %s, %s)
             RETURNING id, username, email, role, created_at
         """, (
+<<<<<<< HEAD
             data["name"],
+=======
+            data["username"],
+>>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
             data["email"],
             password_hash,
             "admin"
@@ -103,7 +124,11 @@ def register():
             conn.rollback()
         return jsonify({
             "error": "Failed to register user",
+<<<<<<< HEAD
             "details": repr(e)
+=======
+            "details": str(e)
+>>>>>>> 7242f513ee0938e42e40502b2d03d404a0a05b9d
         }), 500
 
     finally:
