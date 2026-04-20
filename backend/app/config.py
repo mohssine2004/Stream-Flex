@@ -18,3 +18,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     MINIO_BASE_URL = os.getenv("MINIO_BASE_URL", "http://localhost:9000/videos")
+
+    # Allow uploads up to 500MB
+    MAX_CONTENT_LENGTH = 500 * 1024 * 1024

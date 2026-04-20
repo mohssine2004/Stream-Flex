@@ -39,6 +39,16 @@ def init_db():
         );
     """)
     
+    # Seed default admin user
+    from werkzeug.security import generate_password_hash
+    admin_email = "admin@admin.com"
+    cursor.execute("SELECT id FROM users WHERE email = %s", (admin_email,))
+    if not cursor.fetchone():
+        cursor.execute("""
+            INSERT INTO users (username, email, password_hash, role)
+            VALUES (%s, %s, %s, %s)
+        """, ("Admin", admin_email, generate_password_hash("admin"), "admin"))
+    
     conn.commit()
     cursor.close()
     conn.close()

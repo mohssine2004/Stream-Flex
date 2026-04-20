@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -14,8 +15,6 @@ function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login with", { email, password, rememberMe });
-    
     try {
       const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || "";
       const res = await fetch(`${API_URL}/api/login`, {
@@ -33,11 +32,21 @@ function Login() {
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+
+      toast.success("Connexion réussie !", {
+        description: `Bienvenue, ${data.user?.username || "utilisateur"} 👋`,
+      });
       
-      // Redirection vers la page d'accueil (connexion réussie)
-      navigate({ to: "/" });
+      // Redirect based on role
+      if (data.user?.role === "admin") {
+        navigate({ to: "/admin/dashboard" });
+      } else {
+        navigate({ to: "/" });
+      }
     } catch (error: any) {
-      alert(error.message);
+      toast.error("Échec de connexion", {
+        description: error.message,
+      });
     }
   };
 

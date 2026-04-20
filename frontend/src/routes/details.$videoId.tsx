@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Play, ArrowLeft, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import Loader from "@/components/Loader";
 import { getVideoById } from "@/services/api";
 import type { Video } from "@/types/video";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/details/$videoId")({
   head: () => ({
@@ -19,11 +20,26 @@ export const Route = createFileRoute("/details/$videoId")({
 
 function Details() {
   const { videoId } = useParams({ from: "/details/$videoId" });
+  const navigate = useNavigate();
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Check authentication — show toast and redirect if not logged in
   useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    if (!isAuthenticated) {
+      toast.error("Connexion requise", {
+        description: "Vous devez être connecté pour voir les détails d'une vidéo.",
+      });
+      navigate({ to: "/login" });
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    if (!isAuthenticated) return;
+
     let cancelled = false;
     setLoading(true);
     getVideoById(videoId)

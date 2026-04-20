@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/signup")({
   component: Signup,
@@ -17,15 +18,19 @@ function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!acceptTerms) {
-      alert("Veuillez accepter les conditions d'utilisation et la politique de confidentialité.");
+      toast.warning("Conditions d'utilisation", {
+        description: "Veuillez accepter les conditions d'utilisation et la politique de confidentialité.",
+      });
       return;
     }
     if (password !== confirmPassword) {
-      alert("Les mots de passe ne correspondent pas.");
+      toast.error("Erreur de mot de passe", {
+        description: "Les mots de passe ne correspondent pas.",
+      });
       return;
     }
     
-    console.log("Signup with", { name, email, password, confirmPassword, acceptTerms });
+
     
     try {
       const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || "";
@@ -45,10 +50,16 @@ function Signup() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       
+      toast.success("Compte créé avec succès !", {
+        description: `Bienvenue, ${data.user?.username || name} 👋`,
+      });
+
       // Redirection vers la page d'accueil (connexion réussie)
       navigate({ to: "/" });
     } catch (error: any) {
-      alert(error.message);
+      toast.error("Échec de l'inscription", {
+        description: error.message,
+      });
     }
   };
 

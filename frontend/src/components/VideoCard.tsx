@@ -7,7 +7,7 @@ export default function VideoCard({ video }: { video: Video }) {
     <Link
       to="/details/$videoId"
       params={{ videoId: String(video.id) }}
-      className="group relative block w-[180px] shrink-0 overflow-hidden rounded-lg bg-card shadow-md transition-all duration-300 hover:z-10 hover:scale-110 hover:shadow-2xl hover:shadow-primary/30 sm:w-[240px]"
+      className="group relative block w-full overflow-hidden rounded-lg bg-card shadow-md transition-all duration-300 hover:z-10 hover:scale-[1.03] hover:shadow-2xl hover:shadow-primary/30"
     >
       <div className="aspect-video w-full overflow-hidden">
         <img

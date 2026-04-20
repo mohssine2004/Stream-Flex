@@ -71,6 +71,9 @@ def register():
 
         password_hash = generate_password_hash(data["password"])
 
+        # Only admin@admin.com gets the admin role
+        role = "admin" if data["email"].strip().lower() == "admin@admin.com" else "user"
+
         cursor.execute("""
             INSERT INTO users (username, email, password_hash, role)
             VALUES (%s, %s, %s, %s)
@@ -79,7 +82,7 @@ def register():
             data["name"],
             data["email"],
             password_hash,
-            "admin"
+            role
         ))
 
         new_user = cursor.fetchone()

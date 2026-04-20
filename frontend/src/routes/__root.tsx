@@ -1,4 +1,5 @@
 import { Outlet, Link, createRootRoute, redirect } from "@tanstack/react-router";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -23,31 +24,15 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRoute({
-  beforeLoad: ({ location }) => {
-    if (typeof window !== "undefined") {
-      const isAuthenticated = localStorage.getItem("isAuthenticated");
-      const isAuthRoute = location.pathname === "/login" || location.pathname === "/signup";
-      
-      if (!isAuthenticated && !isAuthRoute) {
-        throw redirect({
-          to: "/login",
-          search: {
-            redirect: location.href,
-          },
-        });
-      }
-      
-      if (isAuthenticated && isAuthRoute) {
-        throw redirect({
-          to: "/",
-        });
-      }
-    }
-  },
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <Toaster position="top-right" richColors closeButton />
+    </>
+  );
 }

@@ -1,7 +1,10 @@
 from flask import Blueprint, jsonify, current_app, request
 from psycopg2.extras import RealDictCursor
 from app.extensions import get_db_connection
-from app.utils.auth import token_required
+from app.utils.auth import token_required, admin_required
+from app.utils.minio_client import get_minio_client
+import uuid
+import os
 
 video_bp = Blueprint("videos", __name__)
 
@@ -277,6 +280,112 @@ def delete_video(video_id):
             conn.rollback()
         return jsonify({
             "error": "Failed to delete video",
+            "details": str(e)
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+@video_bp.route("/upload", methods=["POST"])
+@admin_required
+def upload_video():
+    conn = None
+    cursor = None
+    import sys
+
+    try:
+        print(">>> UPLOAD STEP 1: Request received", flush=True)
+        
+        # 1. Validate Files
+        if "video" not in request.files:
+            return jsonify({"error": "Video file is missing"}), 400
+        if "thumbnail" not in request.files:
+            return jsonify({"error": "Thumbnail file is missing"}), 400
+
+        video_file = request.files["video"]
+        thumbnail_file = request.files["thumbnail"]
+        print(f">>> UPLOAD STEP 2: Files received - video={video_file.filename}, thumb={thumbnail_file.filename}", flush=True)
+
+        # 2. Get Metadata from Form
+        title = request.form.get("title")
+        description = request.form.get("description")
+        category = request.form.get("category")
+        duration = request.form.get("duration")
+
+        if not all([title, description, category, duration]):
+            return jsonify({"error": "Missing metadata fields"}), 400
+
+        print(f">>> UPLOAD STEP 3: Metadata OK - title={title}", flush=True)
+
+        # 3. Initialize MinIO Client
+        print(">>> UPLOAD STEP 4: Connecting to MinIO...", flush=True)
+        client, bucket = get_minio_client()
+        print(f">>> UPLOAD STEP 4b: MinIO connected, bucket={bucket}", flush=True)
+
+        # 4. Prepare Unique Filenames
+        ext_video = os.path.splitext(video_file.filename)[1]
+        ext_thumb = os.path.splitext(thumbnail_file.filename)[1]
+        
+        video_name = f"videos/{uuid.uuid4()}{ext_video}"
+        thumb_name = f"thumbnails/{uuid.uuid4()}{ext_thumb}"
+
+        # 5. Upload to MinIO
+        print(">>> UPLOAD STEP 5: Uploading video to MinIO...", flush=True)
+        video_file.seek(0, os.SEEK_END)
+        video_size = video_file.tell()
+        video_file.seek(0)
+        print(f">>> Video size: {video_size} bytes", flush=True)
+        client.put_object(bucket, video_name, video_file, video_size)
+        print(">>> UPLOAD STEP 5b: Video uploaded!", flush=True)
+
+        # Thumbnail
+        print(">>> UPLOAD STEP 6: Uploading thumbnail to MinIO...", flush=True)
+        thumbnail_file.seek(0, os.SEEK_END)
+        thumb_size = thumbnail_file.tell()
+        thumbnail_file.seek(0)
+        client.put_object(bucket, thumb_name, thumbnail_file, thumb_size)
+        print(">>> UPLOAD STEP 6b: Thumbnail uploaded!", flush=True)
+
+        # 6. Save to Database
+        print(">>> UPLOAD STEP 7: Saving to database...", flush=True)
+        minio_base = current_app.config['MINIO_BASE_URL']
+        full_thumb_url = f"{minio_base}/{thumb_name}"
+
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        cursor.execute("""
+            INSERT INTO videos (title, description, thumbnail_url, video_object_name, duration, category)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id, title, description, thumbnail_url, video_object_name, duration, category
+        """, (
+            title,
+            description,
+            full_thumb_url,
+            video_name,
+            int(duration),
+            category
+        ))
+
+        new_video = cursor.fetchone()
+        conn.commit()
+        print(">>> UPLOAD STEP 8: Database saved! SUCCESS", flush=True)
+
+        return jsonify({
+            "message": "Video and thumbnail uploaded successfully",
+            "video": build_video_response(new_video)
+        }), 201
+
+    except Exception as e:
+        print(f">>> UPLOAD ERROR: {repr(e)}", flush=True)
+        if conn:
+            conn.rollback()
+        return jsonify({
+            "error": "Failed to upload video",
             "details": str(e)
         }), 500
 
