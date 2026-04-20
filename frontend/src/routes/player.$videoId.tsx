@@ -79,7 +79,6 @@ function Player() {
                 autoPlay
                 preload="auto"
                 playsInline
-                crossOrigin="anonymous"
                 style={{ width: "100%", height: "auto", aspectRatio: "16/9" }}
                 className="w-full bg-black shadow-2xl overflow-hidden rounded-lg"
               >
