@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: streamflex-frontend # Added this line
+    ports:
+      - "80:80"
+    container_name: streamflex-frontend
+    restart: unless-stopped
